@@ -1,6 +1,6 @@
 " vim: set ts=4 sw=4 sts=0:
 "-----------------------------------------------------------------------------
-" ʸ�������ɴ�Ϣ
+" 文字コード関連
 "
 if &encoding !=# 'utf-8'
 	set encoding=japan
@@ -9,16 +9,16 @@ endif
 if has('iconv')
 	let s:enc_euc = 'euc-jp'
 	let s:enc_jis = 'iso-2022-jp'
-	" iconv��eucJP-ms���б����Ƥ��뤫������å�
+	" iconvがeucJP-msに対応しているかをチェック
 	if iconv("\x87\x64\x87\x6a", 'cp932', 'eucjp-ms') ==# "\xad\xc5\xad\xcb"
 		let s:enc_euc = 'eucjp-ms'
 		let s:enc_jis = 'iso-2022-jp-3'
-	" iconv��JISX0213���б����Ƥ��뤫������å�
+	" iconvがJISX0213に対応しているかをチェック
 	elseif iconv("\x87\x64\x87\x6a", 'cp932', 'euc-jisx0213') ==# "\xad\xc5\xad\xcb"
 		let s:enc_euc = 'euc-jisx0213'
 		let s:enc_jis = 'iso-2022-jp-3'
 	endif
-	" fileencodings����
+	" fileencodingsを構築
 	if &encoding ==# 'utf-8'
 		let s:fileencodings_default = &fileencodings
 		let &fileencodings = s:enc_jis .','. s:enc_euc .',cp932'
@@ -38,11 +38,11 @@ if has('iconv')
 			let &fileencodings = &fileencodings .','. s:enc_euc
 		endif
 	endif
-	" ������ʬ
+	" 定数を処分
 	unlet s:enc_euc
 	unlet s:enc_jis
 endif
-" ���ܸ��ޤޤʤ����� fileencoding �� encoding ��Ȥ��褦�ˤ���
+" 日本語を含まない場合は fileencoding に encoding を使うようにする
 if has('autocmd')
 	function! AU_ReCheck_FENC()
 		if &fileencoding =~# 'iso-2022-jp' && search("[^\x01-\x7e]", 'n') == 0
@@ -51,19 +51,19 @@ if has('autocmd')
 	endfunction
 	autocmd BufReadPost * call AU_ReCheck_FENC()
 endif
-" ���ԥ����ɤμ�ưǧ��
+" 改行コードの自動認識
 set fileformats=unix,dos,mac
-" ���Ȥ�����ʸ�������äƤ⥫��������֤�����ʤ��褦�ˤ���
+" □とか○の文字があってもカーソル位置がずれないようにする
 if exists('&ambiwidth')
 	set ambiwidth=double
 endif
 
 "-----------------------------------------------------------------------------
-" �Խ���Ϣ
+" 編集関連
 "
-"�����ȥ���ǥ�Ȥ���
+"オートインデントする
 set autoindent
-"�Х��ʥ��Խ�(xxd)�⡼�ɡ�vim -b �Ǥε�ư���⤷���� *.bin ��ȯư���ޤ���
+"バイナリ編集(xxd)モード（vim -b での起動、もしくは *.bin で発動します）
 augroup BinaryXXD
 	autocmd!
 	autocmd BufReadPre  *.bin let &binary =1
@@ -75,62 +75,62 @@ augroup BinaryXXD
 augroup END
 
 "-----------------------------------------------------------------------------
-" ������Ϣ
+" 検索関連
 "
-"����ʸ���󤬾�ʸ���ξ�����ʸ����ʸ������̤ʤ���������
+"検索文字列が小文字の場合は大文字小文字を区別なく検索する
 set ignorecase
-"����ʸ�������ʸ�����ޤޤ�Ƥ�����϶��̤��Ƹ�������
+"検索文字列に大文字が含まれている場合は区別して検索する
 set smartcase
-"�������˺Ǹ�ޤǹԤä���ǽ�����
+"検索時に最後まで行ったら最初に戻る
 set wrapscan
-"����ʸ�������ϻ��˽缡�о�ʸ����˥ҥåȤ����ʤ�
+"検索文字列入力時に順次対象文字列にヒットさせない
 set noincsearch
 
 "-----------------------------------------------------------------------------
-" ������Ϣ
+" 装飾関連
 "
-"���󥿥å����ϥ��饤�Ȥ�ͭ���ˤ���
+"シンタックスハイライトを有効にする
 if has("syntax")
 	syntax on
 endif
-"���ֹ��ɽ�����ʤ�
+"行番号を表示しない
 "set nonumber
-"���ֹ��ɽ������
+"行番号を表示する
 set number
-"���֤κ�¦�˥�������ɽ��
+"タブの左側にカーソル表示
 "set listchars=tab:\ \ 
 "set list
 set list
 set listchars=tab:>-,trail:-,nbsp:%,extends:>,precedes:<
-"�����������ꤹ��
+"タブ幅を設定する
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
-"������Υ��ޥ�ɤ򥹥ơ�������ɽ������
+"入力中のコマンドをステータスに表示する
 set showcmd
-"������ϻ����б������̤�ɽ��
+"括弧入力時の対応する括弧を表示
 set showmatch
-"�������ʸ����Υϥ��饤�Ȥ�ͭ���ˤ���
+"検索結果文字列のハイライトを有効にする
 set hlsearch
-"���ơ������饤�����ɽ��
+"ステータスラインを常に表示
 set laststatus=2
-"���ơ������饤���ʸ�������ɤȲ���ʸ����ɽ������
+"ステータスラインに文字コードと改行文字を表示する
 set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
 
 
 "-----------------------------------------------------------------------------
-" �ޥå����
+" マップ定義
 "
-"�Хåե���ư�ѥ����ޥå�
-" F2: ���ΥХåե�
-" F3: ���ΥХåե�
-" F4: �Хåե����
+"バッファ移動用キーマップ
+" F2: 前のバッファ
+" F3: 次のバッファ
+" F4: バッファ削除
 map <F2> <ESC>:bp<CR>
 map <F3> <ESC>:bn<CR>
 map <F4> <ESC>:bw<CR>
-"ɽ����ñ�̤ǹ԰�ư����
+"表示行単位で行移動する
 nnoremap j gj
 nnoremap k gk
-"�ե졼�ॵ���������Ƥ��ѹ�����
+"フレームサイズを怠惰に変更する
 map <kPlus> <C-W>+
 map <kMinus> <C-W>-
